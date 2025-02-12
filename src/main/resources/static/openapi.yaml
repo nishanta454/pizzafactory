@@ -1,0 +1,191 @@
+openapi: 3.0.0
+info:
+  title: Pizza Factory API
+  description: API for ordering and managing pizzas
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /menu/pizzas:
+    get:
+      summary: Get available pizzas
+      operationId: getMenu
+      responses:
+        '200':
+          description: List of available pizzas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pizza'
+  
+  /menu/addPizza:
+    post:
+      summary: Add a new pizza to the menu
+      operationId: addPizza
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pizza'
+      responses:
+        '200':
+          description: Pizza added successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /menu/updatePrice:
+    put:
+      summary: Update the price of a pizza
+      operationId: updatePizzaPrice
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: price
+          in: query
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Price updated successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /order/place:
+    post:
+      summary: Place an order
+      operationId: orderPizza
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '200':
+          description: Order placed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Bad request due to invalid input
+
+  /inventory:
+    get:
+      summary: Get current inventory
+      operationId: getInventory
+      responses:
+        '200':
+          description: Current inventory levels
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+
+  /inventory/restock:
+    post:
+      summary: Restock an inventory item
+      operationId: restockItem
+      parameters:
+        - name: item
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: quantity
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Item restocked successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  schemas:
+    Pizza:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [VEGETARIAN, NON_VEGETARIAN]
+        size:
+          type: string
+          enum: [REGULAR, MEDIUM, LARGE]
+        basePrice:
+          type: number
+        crust:
+          type: string
+          enum: [HAND_TOSSED, WHEAT_THIN_CRUST, CHEESE_BURST, FRESHPAN_PIZZA]
+        toppings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Topping'
+    
+    Side:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+    
+    Topping:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [VEG, NON_VEG]
+        price:
+          type: number
+    
+    OrderRequest:
+      type: object
+      properties:
+        pizzas:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pizza'
+        sides:
+          type: array
+          items:
+            $ref: '#/components/schemas/Side'
+    
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        pizzas:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pizza'
+        sides:
+          type: array
+          items:
+            $ref: '#/components/schemas/Side'
+        totalAmount:
+          type: number
